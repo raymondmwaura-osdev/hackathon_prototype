@@ -31,97 +31,165 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ─── Custom CSS (dark premium theme) ─────────────────────────────────────────
+# ─── Theme controls (dark/light) ─────────────────────────────────────────────────
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+theme = st.sidebar.selectbox(
+    "Theme",
+    ["Dark", "Light"],
+    index=0 if st.session_state.theme == "dark" else 1,
+    key="theme_mode_select",
+)
+st.session_state.theme = theme.lower()
+
+
+def _get_theme_values(mode: str):
+    if mode == "dark":
+        return {
+            "app_bg": "linear-gradient(135deg, #0d1117 0%, #161b22 60%, #0d1117 100%)",
+            "text": "#e6edf3",
+            "sidebar_bg": "linear-gradient(180deg, #161b22 0%, #0d1117 100%)",
+            "sidebar_border": "#21262d",
+            "metric_bg": "linear-gradient(135deg, #1c2128, #21262d)",
+            "metric_border": "#30363d",
+            "metric_shadow": "rgba(0,0,0,0.4)",
+            "heading": "#58a6ff",
+            "heading_border": "#21262d",
+            "badge_sub": "#1a4731",
+            "badge_std": "#1f3a5f",
+            "badge_prem": "#4a1a1a",
+            "text_muted": "#8b949e",
+            "link": "#58a6ff",
+            "tab_bg": "#21262d",
+            "tab_active_bg": "#1c2128",
+            "button_bg": "linear-gradient(90deg, #238636, #2ea043)",
+            "button_text": "white",
+        }
+    return {
+        "app_bg": "#f4f6ff",
+        "text": "#0f172a",
+        "sidebar_bg": "#ffffff",
+        "sidebar_border": "#e2e8f0",
+        "metric_bg": "#ffffff",
+        "metric_border": "#e2e8f0",
+        "metric_shadow": "rgba(0,0,0,0.06)",
+        "heading": "#0e60d2",
+        "heading_border": "#e2e8f0",
+        "badge_sub": "#1a4731",
+        "badge_std": "#1f3a5f",
+        "badge_prem": "#4a1a1a",
+        "text_muted": "#4b5563",
+        "link": "#0e60d2",
+        "tab_bg": "#f3f4f6",
+        "tab_active_bg": "#e2e8f0",
+        "button_bg": "linear-gradient(90deg, #0e60d2, #0d359a)",
+        "button_text": "white",
+    }
+
+_theme = _get_theme_values(st.session_state.theme)
+
 st.markdown(
-    """
+    f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif;
-    }
+    }}
 
     /* Main background */
-    .stApp {
-        background: linear-gradient(135deg, #0d1117 0%, #161b22 60%, #0d1117 100%);
-        color: #e6edf3;
-    }
+    .stApp {{
+        background: {_theme['app_bg']};
+        color: {_theme['text']};
+    }}
 
     /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
-        border-right: 1px solid #21262d;
-    }
+    section[data-testid="stSidebar"] {{
+        background: {_theme['sidebar_bg']};
+        border-right: 1px solid {_theme['sidebar_border']};
+    }}
+    section[data-testid="stSidebar"] * {{
+        color: {_theme['text']} !important;
+    }}
+    section[data-testid="stSidebar"] a {{
+        color: {_theme['link']} !important;
+    }}
 
     /* Metric cards */
-    .metric-card {
-        background: linear-gradient(135deg, #1c2128, #21262d);
-        border: 1px solid #30363d;
+    .metric-card {{
+        background: {_theme['metric_bg']};
+        border: 1px solid {_theme['metric_border']};
         border-radius: 12px;
         padding: 20px 24px;
         text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        box-shadow: 0 4px 20px {_theme['metric_shadow']};
         transition: transform 0.2s ease;
-    }
-    .metric-card:hover { transform: translateY(-2px); }
-    .metric-card .value {
+    }}
+    .metric-card:hover {{ transform: translateY(-2px); }}
+    .metric-card .value {{
         font-size: 2.2rem;
         font-weight: 700;
         background: linear-gradient(90deg, #58a6ff, #79c0ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }
-    .metric-card .label {
+    }}
+    .metric-card .label {{
         font-size: 0.82rem;
-        color: #8b949e;
+        color: {_theme['text_muted']};
         margin-top: 4px;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-    }
+    }}
 
     /* Section headings */
-    .section-heading {
+    .section-heading {{
         font-size: 1.25rem;
         font-weight: 600;
-        color: #58a6ff;
-        border-bottom: 2px solid #21262d;
+        color: {_theme['heading']};
+        border-bottom: 2px solid {_theme['heading_border']};
         padding-bottom: 8px;
         margin-bottom: 16px;
-    }
+    }}
 
     /* Tariff badge */
-    .badge-sub   { background:#1a4731; color:#56d364; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
-    .badge-std   { background:#1f3a5f; color:#58a6ff; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
-    .badge-prem  { background:#4a1a1a; color:#f97583; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
+    .badge-sub   {{ background:{_theme['badge_sub']}; color:#56d364; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }}
+    .badge-std   {{ background:{_theme['badge_std']}; color:#58a6ff; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }}
+    .badge-prem  {{ background:{_theme['badge_prem']}; color:#f97583; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }}
 
     /* Hide Streamlit branding */
-    #MainMenu, footer { visibility: hidden; }
+    #MainMenu, footer {{ visibility: hidden; }}
 
     /* Tabs */
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
-    .stTabs [data-baseweb="tab"] {
-        background: #21262d;
+    .stTabs [data-baseweb="tab-list"] {{ gap: 8px; }}
+    .stTabs [data-baseweb="tab"] {{
+        background: {_theme['tab_bg']};
         border-radius: 8px 8px 0 0;
-        color: #8b949e;
+        color: {_theme['text_muted']};
         font-weight: 500;
-    }
-    .stTabs [aria-selected="true"] {
-        background: #1c2128;
-        color: #58a6ff !important;
-        border-bottom: 2px solid #58a6ff;
-    }
-
+    }}
+    .stTabs [aria-selected="true"] {{
+        background: {_theme['tab_active_bg']};
+        color: {_theme['heading']} !important;
+        border-bottom: 2px solid {_theme['heading']};
+    }}
+    .stTabs [data-baseweb="tab"] span {{
+        color: {_theme['text_muted']} !important;
+    }}
+    .stTabs [aria-selected="true"] span {{
+        color: {_theme['heading']} !important;
+    }}
     /* Buttons */
-    .stButton > button {
-        background: linear-gradient(90deg, #238636, #2ea043);
-        color: white;
+    .stButton > button {{
+        background: {_theme['button_bg']};
+        color: {_theme['button_text']};
         border: none;
         border-radius: 8px;
         font-weight: 600;
         padding: 0.5rem 1.2rem;
         transition: opacity 0.2s;
-    }
-    .stButton > button:hover { opacity: 0.85; }
+    }}
+    .stButton > button:hover {{ opacity: 0.85; }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -129,20 +197,35 @@ st.markdown(
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
-# Matplotlib global style
-plt.rcParams.update(
-    {
-        "figure.facecolor": "#161b22",
-        "axes.facecolor": "#0d1117",
-        "axes.edgecolor": "#30363d",
-        "axes.labelcolor": "#8b949e",
-        "xtick.color": "#8b949e",
-        "ytick.color": "#8b949e",
-        "text.color": "#e6edf3",
-        "grid.color": "#21262d",
-        "grid.linewidth": 0.6,
-    }
-)
+# Matplotlib global style (adjusts with theme)
+if st.session_state.theme == "dark":
+    plt.rcParams.update(
+        {
+            "figure.facecolor": "#161b22",
+            "axes.facecolor": "#0d1117",
+            "axes.edgecolor": "#30363d",
+            "axes.labelcolor": "#8b949e",
+            "xtick.color": "#8b949e",
+            "ytick.color": "#8b949e",
+            "text.color": "#e6edf3",
+            "grid.color": "#21262d",
+            "grid.linewidth": 0.6,
+        }
+    )
+else:
+    plt.rcParams.update(
+        {
+            "figure.facecolor": "#ffffff",
+            "axes.facecolor": "#f8fafc",
+            "axes.edgecolor": "#cbd5e1",
+            "axes.labelcolor": "#0f172a",
+            "xtick.color": "#1f2937",
+            "ytick.color": "#1f2937",
+            "text.color": "#0f172a",
+            "grid.color": "#e2e8f0",
+            "grid.linewidth": 0.6,
+        }
+    )
 
 TIER_COLORS = {
     "Subsidized": "#56d364",
@@ -272,6 +355,35 @@ def get_cached_results(data_source, n_households, retrain, uploaded_df_bytes=Non
     upsert_households(result)
     
     return result
+
+
+@st.cache_data(show_spinner=False)
+def load_registry_df(cache_bust: int = 0):
+    """Load the latest household registry from the SQLite DB.
+
+    The `cache_bust` parameter is used to invalidate the cached result when
+    a refresh is explicitly requested.
+    """
+    from fairness_index import init_db
+
+    init_db()
+    registry_path = os.path.join(BASE_DIR, "data", "registry.db")
+    if not os.path.exists(registry_path):
+        return pd.DataFrame()
+
+    conn = sqlite3.connect(registry_path)
+    try:
+        df = pd.read_sql("SELECT * FROM households", conn)
+    finally:
+        conn.close()
+    return df
+
+
+# If no analysis has run yet, show the current registry in the dashboard
+if st.session_state.result_df is None:
+    registry_df = load_registry_df(st.session_state.get("_registry_refresh", 0))
+    if not registry_df.empty:
+        st.session_state.result_df = registry_df
 
 
 # ─── Run analysis ─────────────────────────────────────────────────────────────
@@ -483,12 +595,22 @@ if st.session_state.result_df is not None:
     with tab3:
         st.markdown("<div class='section-heading'>Full Results Table</div>", unsafe_allow_html=True)
 
+        if st.button("🔄 Refresh from registry"):
+            st.session_state._registry_refresh = st.session_state.get("_registry_refresh", 0) + 1
+            st.session_state.result_df = None
+            st.rerun()
+
+        search_id = st.text_input("Search by Household ID", placeholder="HH_001")
         tier_filter = st.multiselect(
             "Filter by tariff tier",
             ["Subsidized", "Standard", "Premium"],
             default=["Subsidized", "Standard", "Premium"],
         )
         view_df = df[df["tariff_tier"].isin(tier_filter)]
+
+        if search_id.strip():
+            pattern = search_id.strip()
+            view_df = view_df[view_df["household_id"].str.contains(pattern, case=False, na=False)]
 
         display_cols = [
             "household_id",
