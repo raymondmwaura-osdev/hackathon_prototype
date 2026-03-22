@@ -98,6 +98,10 @@ st.markdown(f"""
     .info-card h3 {{ margin-top: 0; color: {_theme['nav_bg']}; }}
     .info-card p {{ margin: 10px 0; color: {_theme['muted']}; }}
 
+    .feature-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 14px; }}
+    .feature-card {{ background: {_theme['button_end']}; border: 1px solid {_theme['button_start']}; color: white; padding: 14px; border-radius: 14px; box-shadow: 0 12px 28px rgba(0,0,0,0.3); min-height: 96px; }}
+    .feature-card strong {{ display: block; font-size: 1rem; margin-bottom: 6px; }}
+
     .step-badge {{ display: inline-block; background: rgba(0, 45, 114, 0.1); color: {_theme['nav_bg']}; border-radius: 999px; padding: 6px 14px; font-weight: 700; margin-right: 10px; margin-bottom: 10px; }}
 
     /* Forms */
@@ -124,29 +128,20 @@ st.markdown(f"""
 
     /* Footer */
     .footer {{ color: {_theme['footer']}; font-size: 0.9rem; text-align: center; padding-top: 14px; }}
+    @media (max-width: 940px) {{
+        .top-nav {{ flex-direction: column; align-items: start; gap: 10px; padding: 12px; }}
+        .top-nav .nav-links {{ width: 100%; display: flex; flex-wrap: wrap; gap: 10px; }}
+        .top-nav .nav-links a {{ margin-left: 0; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
+        .hero-title {{ font-size: 1.8rem; }}
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-# Top navigation (mimics modern utility portals)
-st.markdown(
-    f"""
-    <div class='top-nav'>
-        <div class='brand'>
-            <span>⚡</span>
-            <div>
-                <div style='font-size:1.1rem; font-weight:700;'>HEFI Self-Service</div>
-                <div style='font-size:0.8rem; color: {_theme["muted"]};'>Fair tariffs, fairer outcomes</div>
-            </div>
-        </div>
-        <div class='nav-links'>
-            <a href='#home'>Home</a>
-            <a href='#register'>Register</a>
-            <a href='#login'>Login</a>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+# Setup navigation state defaults
+if "view" not in st.session_state:
+    st.session_state.view = "landing"
+if "login_mode" not in st.session_state:
+    st.session_state.login_mode = False
 
 # ─── Session State ───────────────────────────────────────────────────────────
 if "authenticated" not in st.session_state:
@@ -214,15 +209,15 @@ if not st.session_state.authenticated:
     st.markdown("<h3>Ready to get started?</h3>", unsafe_allow_html=True)
     st.markdown("Use the panel to the right to log in (if already registered) or register a new household.")
     st.markdown(
-        "<div style='display:flex; gap:14px; flex-wrap:wrap; margin-top:14px;'>"
-        "<div style='flex:1; min-width:180px; padding:12px; background:#eef2ff; border-radius:12px; border:1px solid #cbd5e1;'>"
-        "<strong>✔️ Quick access:</strong><br>Check your HEFI score instantly."
+        "<div class='feature-grid'>"
+        "<div class='feature-card'>"
+        "<strong>✔️ Quick access</strong>Check your HEFI score instantly with clear guidance."
         "</div>"
-        "<div style='flex:1; min-width:180px; padding:12px; background:#eef2ff; border-radius:12px; border:1px solid #cbd5e1;'>"
-        "<strong>📝 Update details:</strong><br>Keep your profile up to date for fair calculations."
+        "<div class='feature-card'>"
+        "<strong>📝 Update details</strong>Keep your profile up to date for fair calculations and better results."
         "</div>"
-        "<div style='flex:1; min-width:180px; padding:12px; background:#eef2ff; border-radius:12px; border:1px solid #cbd5e1;'>"
-        "<strong>💬 Get support:</strong><br>Chat with HEFI assistant anytime."
+        "<div class='feature-card'>"
+        "<strong>💬 Get support</strong>Chat with the HEFI assistant anytime for tips and help."
         "</div>"
         "</div>"
     , unsafe_allow_html=True)
@@ -231,6 +226,8 @@ if not st.session_state.authenticated:
     col_info, col_actions = st.columns([2, 1])
     with col_actions:
         if st.session_state.view == "landing":
+            if st.session_state.login_mode:
+                st.info("🔒 Login mode active: enter your Household ID to access your dashboard.")
             st.markdown("### Already registered? Log in")
             hid_input = st.text_input("Household ID", placeholder="HH_001", key="login_hid")
             if st.button("Access Dashboard", key="login_btn"):
@@ -246,6 +243,7 @@ if not st.session_state.authenticated:
             st.markdown("---")
             if st.button("Register for HEFI", key="goto_register"):
                 st.session_state.view = "register"
+                st.session_state.login_mode = False
                 st.rerun()
 
         elif st.session_state.view == "register":
@@ -299,6 +297,7 @@ if not st.session_state.authenticated:
 
             if st.button("Back to Home", key="back_to_landing"):
                 st.session_state.view = "landing"
+                st.session_state.login_mode = False
                 st.rerun()
 
         else:
